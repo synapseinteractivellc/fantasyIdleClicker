@@ -1,0 +1,2 @@
+# fantasyIdleClicker
+Fantasy Idle Clicker
