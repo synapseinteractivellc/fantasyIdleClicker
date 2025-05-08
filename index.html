@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Idle Clicker</title>
+    <style>
+        :root {
+            --primary-color: #4b2e83;
+            --secondary-color: #85754d;
+            --background-color: #f0e6d2;
+            --panel-color: #d0c0a0;
+            --text-color: #333;
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .game-container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            margin: 2rem 0;
+            gap: 20px;
+        }
+        
+        .left-panel, .right-panel {
+            background-color: var(--panel-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .left-panel {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .right-panel {
+            flex: 2;
+        }
+        
+        .character-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .character-portrait {
+            width: 150px;
+            height: 150px;
+            background-color: #ccc;
+            border: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            margin-bottom: 15px;
+            background-image: url('/api/placeholder/150/150');
+            background-size: cover;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .character-portrait:active {
+            transform: scale(0.95);
+        }
+        
+        .stat-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .stat-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease-out;
+        }
+        
+        .hp-fill {
+            background-color: #e74c3c;
+            width: 100%;
+        }
+        
+        .xp-fill {
+            background-color: #3498db;
+            width: 0%;
+        }
+        
+        .gold-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 15px 0;
+        }
+        
+        .gold-icon {
+            width: 25px;
+            height: 25px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .enemy-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .enemy-portrait {
+            width: 120px;
+            height: 120px;
+            background-color: #888;
+            border: 2px solid #555;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-image: url('/api/placeholder/120/120');
+            background-size: cover;
+        }
+        
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .upgrade-item:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .upgrade-item.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .log-container {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            opacity: 0.7;
+        }
+        
+        .tab.active {
+            opacity: 1;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-panel {
+            margin-bottom: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Fantasy Idle Clicker</h1>
+    </header>
+    
+    <div class="game-container">
+        <div class="left-panel">
+            <div class="character-area">
+                <div id="character-portrait" class="character-portrait"></div>
+                <h2 id="character-name">Hero (Level 1)</h2>
+                
+                <div class="stat-label">
+                    <span>HP:</span>
+                    <span id="hp-value">100/100</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-fill hp-fill" id="hp-bar"></div>
+                </div>
+                
+                <div class="stat-label">
+                    <span>XP:</span>
+                    <span id="xp-value">0/100</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-fill xp-fill" id="xp-bar"></div>
+                </div>
+                
+                <div class="gold-container">
+                    <div class="gold-icon"></div>
+                    <span id="gold-value">0</span>
+                </div>
+            </div>
+            
+            <div class="enemy-area" id="enemy-area">
+                <h3>Current Enemy</h3>
+                <div class="enemy-portrait" id="enemy-portrait"></div>
+                <h3 id="enemy-name">Goblin</h3>
+                
+                <div class="stat-label">
+                    <span>Enemy HP:</span>
+                    <span id="enemy-hp-value">50/50</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="stat-fill hp-fill" id="enemy-hp-bar"></div>
+                </div>
+            </div>
+            
+            <div class="log-container" id="log-container">
+                <div class="log-entry">Welcome to Fantasy Idle Clicker!</div>
+                <div class="log-entry">Click on your character to attack enemies.</div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="tab-container">
+                <div class="tab active" data-tab="upgrades">Upgrades</div>
+                <div class="tab" data-tab="stats">Stats</div>
+                <div class="tab" data-tab="adventures">Adventures</div>
+            </div>
+            
+            <div class="tab-content active" id="upgrades-tab">
+                <h3>Upgrades</h3>
+                <div class="upgrade-item" id="upgrade-weapon">
+                    <span>Weapon Upgrade</span>
+                    <span>10 gold</span>
+                </div>
+                <div class="upgrade-item" id="upgrade-armor">
+                    <span>Armor Upgrade</span>
+                    <span>15 gold</span>
+                </div>
+                <div class="upgrade-item" id="upgrade-potion">
+                    <span>Health Potion</span>
+                    <span>5 gold</span>
+                </div>
+                <div class="upgrade-item" id="upgrade-passive">
+                    <span>Passive Damage</span>
+                    <span>25 gold</span>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="stats-tab">
+                <h3>Character Stats</h3>
+                <div class="stats-panel">
+                    <div class="stat-row">
+                        <span>Attack:</span>
+                        <span id="stat-attack">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Defense:</span>
+                        <span id="stat-defense">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Passive Damage:</span>
+                        <span id="stat-passive">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Critical Chance:</span>
+                        <span id="stat-critical">5%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Gold Bonus:</span>
+                        <span id="stat-gold-bonus">0%</span>
+                    </div>
+                </div>
+                
+                <h3>Combat Stats</h3>
+                <div class="stats-panel">
+                    <div class="stat-row">
+                        <span>Enemies Defeated:</span>
+                        <span id="stat-enemies-defeated">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Total Gold Earned:</span>
+                        <span id="stat-total-gold">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Critical Hits:</span>
+                        <span id="stat-critical-hits">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="adventures-tab">
+                <h3>Adventures</h3>
+                <p>Unlock adventures as you level up!</p>
+                <div class="upgrade-item disabled">
+                    <span>Forest Expedition (Level 3)</span>
+                    <span>Locked</span>
+                </div>
+                <div class="upgrade-item disabled">
+                    <span>Dungeon Crawl (Level 5)</span>
+                    <span>Locked</span>
+                </div>
+                <div class="upgrade-item disabled">
+                    <span>Dragon's Lair (Level 10)</span>
+                    <span>Locked</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
